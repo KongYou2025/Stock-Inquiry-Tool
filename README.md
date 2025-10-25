@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/23138567/README.md)
 # 股票查询工具
 
 集中化的多源稳健股票行情查询项目目录。包含源代码、构建配置、分发产物、工具脚本与文档，后续开发维护均在此目录进行。

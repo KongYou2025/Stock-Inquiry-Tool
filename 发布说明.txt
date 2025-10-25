@@ -1,0 +1,92 @@
+发布说明
+
+一、常见问题解答（FAQ）
+1. 双击GUI无响应或被系统拦截
+- 现象：Windows SmartScreen提示“已保护你的电脑”。
+- 解决：点击“更多信息”→“仍要运行”。如被杀毒软件拦截，将本工具EXE加入信任/白名单。
+
+2. CLI/GUI提示网络超时或查询失败
+- 现象：长时间等待或报错（Timeout/ConnectionError/403/429）。
+- 可能原因：公司网络防火墙或代理未放行行情域名；目标域名限流；临时网络波动。
+- 解决：
+  a) 按下方“网络白名单域名列表”在防火墙/代理放行；
+  b) 使用PowerShell测试连通性：
+     - Test-NetConnection qt.gtimg.cn -Port 80
+     - Test-NetConnection push2.eastmoney.com -Port 443
+     - Invoke-WebRequest https://hq.sinajs.cn -UseBasicParsing
+  c) 如频繁429/403，减少查询频率，稍后重试；本工具内置按站点的crawl-delay速率限制与熔断降级，会自动切换数据源。
+
+3. 数据来源显示unknown或数据为空
+- 现象：输出末尾“数据来源: unknown”。
+- 可能原因：主/备源均不可用或被防火墙拦截；网络证书异常。
+- 解决：
+  a) 依次测试白名单域名连通性；
+  b) 确保系统可信根证书为最新（Windows Update）；
+  c) 企业代理环境设置环境变量：
+     - setx HTTP_PROXY http://<proxy_host>:<port>
+     - setx HTTPS_PROXY http://<proxy_host>:<port>
+
+4. GUI界面显示异常或字体不清晰
+- 解决：右键EXE→属性→兼容性→更改高DPI设置，或在显示设置中调整缩放比例；确保中文字体可用。
+
+5. 杀毒/安全软件误报
+- 现象：EXE被隔离或删除。
+- 解决：将整个“股票查询工具”文件夹加入安全软件的信任列表；发布包为单文件可执行程序，内含Python运行时与依赖，属于正常行为。
+
+6. 查询结果与其他平台不一致
+- 说明：不同数据源发布时间与口径存在差异；本工具已对高/低位进行基本一致性校正并标注“数据来源”。
+- 建议：如关心某源，请在交易时段内比对同一源的结果；可在弱网/限流环境下稍后重试。
+
+7. 企业内网代理使用CLI示例
+- 在PowerShell中：
+  - setx HTTP_PROXY http://proxy.company.com:8080
+  - setx HTTPS_PROXY http://proxy.company.com:8080
+  - 重新打开终端运行：股票查询CLI.exe --code 600519
+
+8. 无需安装Python环境
+- 发布版为PyInstaller打包的单文件EXE，内置Python与依赖；解压后可直接运行。
+
+二、网络白名单域名列表（按数据源分类）
+为保证查询稳定，请在防火墙/代理放行以下域名（含robots.txt访问）：
+
+A. Tencent（腾讯行情）
+- qt.gtimg.cn
+- stock.gtimg.cn
+
+B. Sina（新浪行情）
+- hq.sinajs.cn
+- finance.sina.com.cn
+- quotes.sina.cn
+
+C. EastMoney（东方财富）
+- push2.eastmoney.com
+- api.eastmoney.com
+- datacenter-web.eastmoney.com
+- emdata.eastmoney.com
+
+D. 其他说明
+- Akshare为本地Python库，其内部可能调用以上第三方域名；无需单独放行Akshare域名。
+- 如企业网络启用HTTPS拦截/证书替换，请确保系统信任企业根证书，以避免HTTPS握手失败。
+
+三、运行与使用提示
+- CLI：dist/股票查询CLI.exe --code <股票代码>
+- GUI：双击 dist/股票查询GUI.exe
+- 输出含“数据来源”和“获取时间”，便于审计与排查。
+
+四、支持与反馈
+- 如遇持续不可用：记录时间点、股票代码、提示信息与所在网络环境，反馈给运维或开发负责人以便分析。
+- 建议在非交易高峰时段进行批量查询，减少限流概率。
+
+五、许可证
+- 本项目采用 MIT License，全文见项目根目录 `LICENSE`
+- 版权声明：本程序由空游开发 · © 2025 空游
+- 分发要求：任何再分发或修改必须保留版权与许可声明；二进制分发建议随附 `LICENSE` 文件
+- 二进制说明：CLI 与 GUI 在界面/输出中已显示版权与许可证提示，以便最终用户知悉
+
+六、校验与完整性
+- 发布包：`D:\code\股票查询工具_发布版.zip`
+- 算法：`SHA-256`
+- 校验值：`A6514F498C652A787303C52955CBA3CC359817D2349F540E278F91860AB9EEAA`
+- 验证（Windows PowerShell）：`Get-FileHash -Algorithm SHA256 -Path D:\code\股票查询工具_发布版.zip`
+- 验证（Linux）：`sha256sum 股票查询工具_发布版.zip`
+- 验证（macOS）：`shasum -a 256 股票查询工具_发布版.zip`
